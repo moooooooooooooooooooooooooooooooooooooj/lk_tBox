@@ -2,7 +2,7 @@
   "sites": [
     {
       "key": "wogg",
-      "name": "玩偶",
+      "name": "玩偶|KK",
       "type": 5,
       "searchable": 1,
       "filterClass": "",
@@ -17,7 +17,7 @@
     },
     {
       "key": "mogg",
-      "name": "木偶",
+      "name": "木偶|UC",
       "type": 5,
       "searchable": 1,
       "filterClass": "",
@@ -32,7 +32,7 @@
     },
     {
       "key": "网盘推送",
-      "name": "推送",
+      "name": "网盘|TS",
       "type": 5,
       "searchable": 0,
       "filterClass": "",
