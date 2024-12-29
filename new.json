@@ -26,8 +26,22 @@
 		"flagable": 0,
 		"filterPlayFileKeywords": "",
 		"keepPlayFileKeywords": "",
-        "recommend": "1"
+        	"recommend": "1"
 	},{
+  		"key": "dandanplay",
+  		"name": "弹弹play",
+  		"type": 5,
+  		"searchable": 0,
+  		"filterClass": "",
+  		"firstClass": "",
+  		"filterPlay": "",
+  		"firstPlay": "",
+  		"ext": "dandanplay.js",
+  		"flagable": 0,
+  		"filterPlayFileKeywords": "",
+  		"keepPlayFileKeywords": "",
+        	"danmu":"1"
+ 	},{
 		"key": "labi",
 		"name": "🖍蜡笔┃网盘",
 		"type": 5,
