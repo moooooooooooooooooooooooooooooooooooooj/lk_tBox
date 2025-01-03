@@ -27,7 +27,7 @@
       		"filterPlayFileKeywords": "",
       		"keepPlayFileKeywords": "",
       		"selectedPlayer": "0"
-    },{
+    	},{
     		"key": "网盘推送",
     		"name": "网盘┃TS",
     		"type": 5,
@@ -41,5 +41,19 @@
     		"filterPlayFileKeywords": "",
     		"keepPlayFileKeywords": "",
     		"selectedPlayer": "0"
-  	}]
+  	},{
+    		"key": "youtube",
+    		"name": "YTB┃SS",
+    		"type": 5,
+    		"searchable": 1,
+    		"filterClass": "",
+    		"firstClass": "",
+    		"filterPlay": "",
+    		"firstPlay": "",
+    		"ext": "https://ghproxy.cn/https://raw.githubusercontent.com/moooooooooooooooooooooooooooooooooooooj/lk_tBox/refs/heads/main/newjs/youtube.js",
+    		"flagable": 0,
+    		"filterPlayFileKeywords": "",
+    		"keepPlayFileKeywords": "",
+    		"selectedPlayer": "0"
+  		}]
 }
