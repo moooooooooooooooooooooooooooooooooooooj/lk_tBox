@@ -1,7 +1,7 @@
 
 const customText = {
   动漫: {
-    Ani-One中文: "@AniOneAnime",
+    动漫花园: "@AniOneAnime",
   },
   科技: {
     极客湾: "@geekerwan1024",
