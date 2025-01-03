@@ -1,5 +1,180 @@
 
+const customText = {
+  动漫: {
+    Ani-One中文: "@AniOneAnime",
+  },
+  科技: {
+    极客湾: "@geekerwan1024",
+  },
+  摄影: {
+    影视飓风: "@mediastorm6801",
+    李子柒: "@cnliziqi",
+  },
+};
+
+
+
+
 const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.6261.95 Safari/537.36';
+
+
+//获取影视列表
+async function categoryContent(tid, pg = 1, extend) {
+  const backData = new RepVideo();
+  try {
+    let { channelId, order = '最新' } = extend ? JSON.parse(extend) : { channelId: '', order: '最新' };
+    if (!channelId && customText[tid]) {
+      const channelIds = Object.values(customText[tid]);
+      if (channelIds.length > 0) {
+        channelId = channelIds[0]; // 取第一个值
+      } else {
+        throw new Error(`未找到与 tid "${tid}" 对应的频道列表`);
+      }
+    }
+    let continuation='';
+    if(pg == 1) {
+      const initialResponse = await req(`https://www.youtube.com/${channelId}/videos`, {
+        method: 'GET',
+        headers: {
+          'User-Agent': UA,
+          'Accept-Language': 'zh-CN,zh;q=0.9'
+        },
+      });
+      if (!initialResponse.ok) {
+        throw new Error(`HTTP error! status: ${initialResponse.status}`);
+      }
+      const initialData = await initialResponse.text();
+      const regex = new RegExp(`"simpleText":"${order}".*?"token":"([^"]+)"`, "s");
+      const match = initialData.match(regex);
+      if (!match) {
+        console.log("未找到匹配的 continuation");
+        return JSON.stringify(backData);
+      }
+      continuation = match[1];
+    }else{
+      continuation = await getStorage('continuation_'+ channelId);
+      if (!continuation) {
+        console.log("未找到 continuation");
+        return JSON.stringify(backData);
+      }
+    }
+
+    const continuationResponse = await req('https://www.youtube.com/youtubei/v1/browse?prettyPrint=false', {
+      method: 'POST',
+      headers: {
+        'User-Agent': UA,
+        'Accept-Language': 'zh-CN,zh;q=0.9',
+        'Content-Type': 'application/json',
+        'Origin': 'https://www.youtube.com',
+        'Referer': `https://www.youtube.com/${channelId}/videos`,
+      },
+      body: JSON.stringify({
+        context: {
+          client: {
+            clientName: "WEB",
+            clientVersion: "2.20241230.09.00"
+          }
+        },
+        continuation
+      })
+    });
+    if (!continuationResponse.ok) {
+      throw new Error(`HTTP error! status: ${continuationResponse.status}`);
+    }
+    const resData = await continuationResponse.text();
+    const continuationData = JSON.parse(resData);
+    let token='';
+    const videos = [];
+    if (continuationData.onResponseReceivedActions && continuationData.onResponseReceivedActions.length > 0) {
+      let contents;
+      if (continuationData.onResponseReceivedActions[1]?.reloadContinuationItemsCommand) {
+          contents = continuationData.onResponseReceivedActions[1].reloadContinuationItemsCommand.continuationItems;
+      } else if (continuationData.onResponseReceivedActions[0]?.appendContinuationItemsAction) {
+          contents = continuationData.onResponseReceivedActions[0].appendContinuationItemsAction.continuationItems;
+      } else {
+          console.error('No continuation items found');
+          return JSON.stringify(backData);
+      }
+      contents.forEach(item => {
+        if (item.continuationItemRenderer?.continuationEndpoint?.continuationCommand?.token) {
+          token = item.continuationItemRenderer.continuationEndpoint.continuationCommand.token;
+          console.log("continuation token:", token);
+      }
+
+        if (item.richItemRenderer?.content?.videoRenderer) {
+          const video = item.richItemRenderer.content.videoRenderer;
+          const videoId = video.videoId;
+          const title = video.title.runs[0].text;
+          const thumbnail = video.thumbnail.thumbnails[0].url;
+          const duration = video.lengthText ? video.lengthText.simpleText : '未知时长';
+          const videoDet = new VideoList();
+          videoDet.vod_id = videoId+ "||" +title + "||" + thumbnail + "||" + duration;
+          videoDet.vod_pic = thumbnail;
+          videoDet.vod_name = title.trim();
+          videoDet.vod_remarks = duration.trim();
+          videos.push(videoDet);
+        }
+      });
+    }
+    await setStorage('continuation_'+ channelId, token);
+    backData.list = videos;
+  } catch (error) {
+    console.error('Error in fetchData:', error);
+    backData.msg = error.statusText || error.message;
+  }
+  console.log(JSON.stringify(backData));
+  return JSON.stringify(backData);
+}
+
+// 分类数据模板
+const filterTemplate = {
+  order: {
+    name: "排序",
+    value: [
+      { n: "最新", v: "最新" },
+      { n: "最热门", v: "最热门" },
+      { n: "最早", v: "最早" }
+    ]
+  }
+};
+
+function generateKeywordFilter(subCategories) {
+  return {
+    key: "channelId",
+    name: "分类",
+    value: [
+      ...Object.keys(subCategories).map(subKey => ({
+        n: subKey,
+        v: subCategories[subKey] || subKey // 如果值为空，则取键名
+      }))
+    ]
+  };
+}
+
+//homeContent();
+
+//获取首页分类
+async function homeContent() {
+  let backData = new RepVideo();
+  let filterData;
+  let classes;
+    classes = Object.keys(customText).map(category => ({
+      type_name: category,
+      type_id: category
+    }));
+    filterData = {};
+    Object.keys(customText).forEach(category => {
+      const keywordFilter = generateKeywordFilter(customText[category]);
+      filterData[category] = [keywordFilter];
+      filterData[category].push(
+        { key: "order", name: "排序", value: filterTemplate.order.value }
+      );
+    });
+  backData.class = classes;
+  backData.filters = filterData;
+  console.log(JSON.stringify(backData));
+  return JSON.stringify(backData);
+}
 
 //searchContent("抖音神曲");
 
