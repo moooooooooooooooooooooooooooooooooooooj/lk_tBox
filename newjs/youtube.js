@@ -1,8 +1,7 @@
 
 const customText = {
   动漫: {
-    一号动漫社: "@animationclub-gq5vr",
-    Anime: "@AniOneAnime",
+    Ani-One中文: "@AniOneAnime",
   },
   科技: {
     极客湾: "@geekerwan1024",
@@ -106,7 +105,8 @@ async function categoryContent(tid, pg = 1, extend) {
           const video = item.richItemRenderer.content.videoRenderer;
           const videoId = video.videoId;
           const title = video.title.runs[0].text;
-          const thumbnail = video.thumbnail.thumbnails[0].url;
+          const thumbnails = video.thumbnail.thumbnails;
+          const thumbnail = thumbnails.length > 0 ? thumbnails[thumbnails.length - 1].url : null;
           const duration = video.lengthText ? video.lengthText.simpleText : '未知时长';
           const videoDet = new VideoList();
           videoDet.vod_id = videoId+ "||" +title + "||" + thumbnail + "||" + duration;
@@ -211,7 +211,8 @@ async function searchContent(keyword) {
                           let video = item.videoRenderer;
                           let videoId = video.videoId;
                           let title = video.title.runs[0].text;
-                          let thumbnail = video.thumbnail.thumbnails[0].url;
+                          const thumbnails = video.thumbnail.thumbnails;
+                          const thumbnail = thumbnails.length > 0 ? thumbnails[thumbnails.length - 1].url : null;
                           let duration = video.lengthText ? video.lengthText.simpleText : 'N/A';
 
                           let videoDet = new VideoList();
